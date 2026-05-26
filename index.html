@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Wireframe</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f0ede8; --surface: #e4e0da; --border: #c8c3bb;
+    --block: #d4cfc8; --label: #8a857e; --accent: #2d2a26;
+    --tag: #b8b3ac; --active: #3d3a36;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--accent); min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* TOP BAR */
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding:12px 24px; background:var(--accent); color:#f0ede8; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:0.08em; position:sticky; top:0; z-index:100; }
+  .topbar-left { display:flex; align-items:center; gap:16px; }
+  .topbar-title { font-weight:700; font-size:12px; }
+  .topbar-sub { opacity:0.5; }
+  .layout-switcher { display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
+  .layout-btn { padding:5px 12px; background:transparent; border:1px solid rgba(240,237,232,0.2); color:rgba(240,237,232,0.6); font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.06em; cursor:pointer; border-radius:3px; transition:all 0.2s; }
+  .layout-btn:hover { border-color:rgba(240,237,232,0.6); color:#f0ede8; }
+  .layout-btn.active { background:rgba(240,237,232,0.15); border-color:#f0ede8; color:#f0ede8; }
+
+  /* LEGEND */
+  .legend { display:flex; gap:20px; align-items:center; padding:8px 24px; background:var(--surface); border-bottom:1px solid var(--border); font-size:10px; font-family:'Space Mono',monospace; color:var(--label); letter-spacing:0.06em; flex-wrap:wrap; }
+  .legend-item { display:flex; align-items:center; gap:6px; }
+  .legend-swatch { width:14px; height:14px; border-radius:2px; border:1px dashed var(--border); }
+  .swatch-img { background:#ccc9c2; background-image:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(0,0,0,0.05) 3px,rgba(0,0,0,0.05) 6px); }
+  .swatch-cta { background:var(--accent); border:none; }
+
+  /* CANVAS */
+  .canvas { flex:1; padding:32px 24px; }
+  .layout-view { display:none; }
+  .layout-view.visible { display:block; }
+
+  /* WIREFRAME PRIMITIVES */
+  .wf-block { background:var(--block); border:1px dashed var(--border); border-radius:4px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:4px; position:relative; }
+  .wf-surface { background:var(--surface); border:1px dashed var(--border); border-radius:4px; position:relative; }
+  .wf-dark { background:var(--accent); border-color:var(--active); }
+  .wf-img { background:#ccc9c2; background-image:linear-gradient(45deg,rgba(0,0,0,0.06) 25%,transparent 25%),linear-gradient(-45deg,rgba(0,0,0,0.06) 25%,transparent 25%),linear-gradient(45deg,transparent 75%,rgba(0,0,0,0.06) 75%),linear-gradient(-45deg,transparent 75%,rgba(0,0,0,0.06) 75%); background-size:12px 12px; background-position:0 0,0 6px,6px -6px,-6px 0px; }
+  .wf-label { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.08em; color:var(--label); text-transform:uppercase; }
+  .wf-sublabel { font-family:'DM Sans',sans-serif; font-size:11px; color:var(--tag); }
+  .wf-note { position:absolute; top:6px; right:8px; font-family:'Space Mono',monospace; font-size:9px; color:var(--tag); letter-spacing:0.04em; }
+  .tline { height:8px; background:var(--border); border-radius:2px; }
+  .tline.h { height:20px; background:#a8a39c; }
+  .tline.t { height:13px; background:#b0aba4; }
+  .tlines { display:flex; flex-direction:column; gap:6px; }
+  .annotation { display:inline-flex; align-items:center; background:#fffde7; border:1px solid #f0d060; border-radius:3px; padding:3px 8px; font-family:'Space Mono',monospace; font-size:9px; color:#8a7a20; pointer-events:none; }
+  .section-label { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.1em; color:var(--label); text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+  .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* NAV */
+  .wf-nav { height:60px; display:flex; align-items:center; justify-content:space-between; padding:0 28px; background:var(--surface); border:1px dashed var(--border); border-radius:4px; gap:16px; margin-bottom:12px; }
+  .nav-logo-block { width:90px; height:14px; background:var(--block); border-radius:2px; flex-shrink:0; }
+  .nav-tabs { display:flex; gap:4px; flex:1; justify-content:center; }
+  .nav-tab { padding:6px 12px; background:transparent; border:none; border-radius:3px; font-family:'Space Mono',monospace; font-size:9px; color:var(--label); letter-spacing:0.06em; white-space:nowrap; cursor:pointer; transition:all 0.15s; }
+  .nav-tab:hover { background:var(--block); color:var(--accent); }
+  .nav-tab.nav-active { background:var(--accent); color:rgba(240,237,232,0.8); }
+  .nav-tab.nav-q { border:1px dotted var(--border); opacity:0.7; }
+
+  /* PAGE */
+  .page { max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
+  .page-content { display:none; }
+  .page-content.visible { display:contents; }
+
+  /* HERO */
+  .hero-full { min-height:400px; display:flex; align-items:stretch; overflow:hidden; border-radius:4px; border:1px dashed var(--border); }
+  .hero-full .hero-img-side { flex:1; }
+  .hero-full .hero-text-side { flex:1; display:flex; flex-direction:column; justify-content:center; gap:16px; padding:48px 40px; background:var(--surface); }
+  .hero-centered { min-height:260px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:48px; }
+  .cta-pill { height:38px; border-radius:3px; background:var(--accent); display:flex; align-items:center; justify-content:center; }
+  .cta-outline { height:38px; border-radius:3px; background:transparent; border:1px dashed var(--border); display:flex; align-items:center; justify-content:center; }
+
+  /* ABOUT */
+  .about-split { display:grid; grid-template-columns:1fr 1.4fr; gap:16px; min-height:300px; }
+  .tag-row { display:flex; gap:8px; flex-wrap:wrap; }
+  .tag { height:26px; border-radius:13px; background:var(--block); border:1px dashed var(--border); padding:0 12px; font-family:'Space Mono',monospace; font-size:9px; color:var(--label); display:flex; align-items:center; }
+
+  /* ART GRID */
+  .art-filter { display:flex; gap:8px; align-items:center; padding:8px 0; }
+  .af-tag { height:28px; padding:0 14px; border-radius:14px; background:var(--block); border:1px dashed var(--border); font-family:'Space Mono',monospace; font-size:9px; color:var(--label); cursor:pointer; display:flex; align-items:center; transition:all 0.15s; }
+  .af-tag.af-active { background:var(--accent); color:rgba(240,237,232,0.7); border-color:var(--accent); }
+  .art-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .art-card { border-radius:4px; overflow:hidden; cursor:pointer; }
+  .art-card-img { height:190px; position:relative; }
+  .art-card-body { background:var(--surface); border:1px dashed var(--border); border-top:none; padding:12px 14px; display:flex; flex-direction:column; gap:5px; }
+  .art-card.art-wide { grid-column:span 2; }
+  .art-card.art-wide .art-card-img { height:230px; }
+  .status-badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:10px; font-family:'Space Mono',monospace; font-size:8px; letter-spacing:0.06em; }
+  .badge-available { background:#e8f4e8; color:#4a8a4a; border:1px solid #c0dcc0; }
+  .badge-exhibited { background:#e8eef8; color:#4a6aaa; border:1px solid #b8ccee; }
+  .badge-sold { background:#f4e8e8; color:#aa4a4a; border:1px solid #ddbcbc; }
+  .badge-loan { background:#fef6e4; color:#a07820; border:1px solid #e8d898; }
+
+  /* ART TRACKER / PROVENANCE PANEL */
+  .tracker-overlay { display:none; position:fixed; inset:0; background:rgba(45,42,38,0.5); z-index:200; align-items:center; justify-content:center; padding:24px; }
+  .tracker-overlay.open { display:flex; }
+  .tracker-panel { background:var(--bg); border-radius:6px; width:100%; max-width:640px; max-height:88vh; overflow-y:auto; display:flex; flex-direction:column; }
+  .tracker-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--border); }
+  .tracker-close { width:32px; height:32px; border-radius:50%; background:var(--block); border:1px dashed var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; font-family:'Space Mono',monospace; font-size:12px; color:var(--label); flex-shrink:0; transition:background 0.15s; }
+  .tracker-close:hover { background:var(--border); }
+  .tracker-body { padding:24px; display:flex; flex-direction:column; gap:20px; }
+  /* simple info row */
+  .tracker-meta { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .meta-cell { display:flex; flex-direction:column; gap:4px; padding:12px; background:var(--surface); border:1px dashed var(--border); border-radius:4px; }
+  .meta-label { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:0.08em; color:var(--tag); text-transform:uppercase; }
+  .meta-val { height:10px; background:var(--block); border-radius:2px; width:75%; }
+  /* divider */
+  .tracker-divider { display:flex; align-items:center; gap:10px; font-family:'Space Mono',monospace; font-size:9px; color:var(--tag); letter-spacing:0.08em; }
+  .tracker-divider::before, .tracker-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+  /* timeline */
+  .provenance-timeline { display:flex; flex-direction:column; gap:0; }
+  .prov-item { display:flex; gap:16px; position:relative; }
+  .prov-item:not(:last-child)::before { content:''; position:absolute; left:15px; top:32px; bottom:-1px; width:1px; background:var(--border); }
+  .prov-dot-col { display:flex; flex-direction:column; align-items:center; padding-top:8px; flex-shrink:0; }
+  .prov-dot { width:10px; height:10px; border-radius:50%; background:var(--block); border:2px solid var(--border); flex-shrink:0; }
+  .prov-dot.active { background:var(--accent); border-color:var(--accent); }
+  .prov-content { flex:1; padding:8px 0 20px; }
+  .prov-date { font-family:'Space Mono',monospace; font-size:8px; color:var(--tag); letter-spacing:0.06em; margin-bottom:4px; }
+  .prov-title { height:11px; background:var(--block); border-radius:2px; width:55%; margin-bottom:5px; }
+  .prov-sub { height:8px; background:var(--border); border-radius:2px; width:75%; }
+  .prov-sub2 { height:8px; background:var(--border); border-radius:2px; width:50%; margin-top:3px; }
+  /* current location highlight */
+  .current-loc { background:var(--surface); border:1px dashed var(--border); border-radius:4px; padding:14px 16px; display:flex; align-items:center; gap:12px; }
+  .loc-icon { width:36px; height:36px; border-radius:50%; background:var(--block); border:1px dashed var(--border); flex-shrink:0; }
+  .loc-text { flex:1; display:flex; flex-direction:column; gap:5px; }
+
+  /* OFFERINGS */
+  .offerings-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  .offering-card { border-radius:4px; padding:28px; display:flex; flex-direction:column; gap:12px; }
+  .offering-icon { width:40px; height:40px; border-radius:50%; background:var(--border); }
+  .offering-cta { width:100px; height:32px; border-radius:3px; background:var(--accent); margin-top:auto; display:flex; align-items:center; justify-content:center; }
+
+  /* EVENTS */
+  .cal-layout { display:grid; grid-template-columns:1fr 260px; gap:16px; }
+  .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+  .cal-cell { height:52px; border-radius:3px; background:var(--surface); border:1px dashed var(--border); display:flex; flex-direction:column; align-items:flex-start; padding:5px; font-family:'Space Mono',monospace; font-size:9px; color:var(--label); }
+  .cal-cell.has-event { background:var(--block); }
+  .cal-cell.today { border-color:var(--accent); font-weight:700; }
+  .cal-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); margin-top:2px; }
+  .event-row { padding:14px 16px; display:flex; flex-direction:column; gap:5px; }
+
+  /* CONTACT */
+  .contact-split { display:grid; grid-template-columns:1.2fr 1fr; gap:16px; min-height:280px; }
+  .form-field { height:40px; background:var(--bg); border:1px dashed var(--border); border-radius:3px; }
+  .form-field.tall { height:100px; }
+  .social-row { display:flex; gap:10px; }
+  .social-icon { width:36px; height:36px; border-radius:50%; background:var(--block); border:1px dashed var(--border); }
+
+  /* FOOTER */
+  .wf-footer { height:64px; display:flex; align-items:center; justify-content:center; }
+
+  /* SIDEBAR LAYOUT */
+  .sb-wrap { display:flex; gap:0; }
+  .sb-rail { width:200px; flex-shrink:0; min-height:680px; padding:28px 16px; background:var(--accent); border-radius:4px 0 0 4px; display:flex; flex-direction:column; gap:16px; }
+  .sb-avatar { width:72px; height:72px; border-radius:50%; background:rgba(240,237,232,0.12); border:2px dashed rgba(240,237,232,0.2); align-self:center; display:flex; align-items:center; justify-content:center; }
+  .sb-name-block { display:flex; flex-direction:column; gap:5px; align-items:center; }
+  .sb-n { height:12px; background:rgba(240,237,232,0.28); border-radius:2px; width:75%; }
+  .sb-r { height:8px; background:rgba(240,237,232,0.14); border-radius:2px; width:55%; }
+  .sb-menu { display:flex; flex-direction:column; gap:4px; margin-top:8px; }
+  .sb-item { height:34px; border-radius:3px; border:1px dashed rgba(240,237,232,0.12); display:flex; align-items:center; padding:0 12px; gap:8px; cursor:pointer; transition:background 0.15s; }
+  .sb-item:hover { background:rgba(240,237,232,0.08); }
+  .sb-item.sb-active { background:rgba(240,237,232,0.16); border-color:rgba(240,237,232,0.3); }
+  .sb-dot { width:5px; height:5px; border-radius:50%; background:rgba(240,237,232,0.35); flex-shrink:0; }
+  .sb-line { height:7px; border-radius:1px; background:rgba(240,237,232,0.22); flex:1; }
+  .sb-line.dim { background:rgba(240,237,232,0.12); }
+  .sb-main { flex:1; background:var(--bg); border:1px dashed var(--border); border-left:none; border-radius:0 4px 4px 0; padding:28px; display:flex; flex-direction:column; gap:16px; }
+</style>
+</head>
+<body>
+
+<!-- TRACKER OVERLAY (shared across all layouts) -->
+<div class="tracker-overlay" id="trackerOverlay" onclick="closeTracker(event)">
+  <div class="tracker-panel" onclick="event.stopPropagation()">
+    <div class="tracker-header">
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="tline t" style="width:160px;"></div>
+          <div class="status-badge badge-exhibited">Exhibited</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <div class="tline" style="width:80px;"></div>
+          <div class="tline" style="width:60px;"></div>
+        </div>
+      </div>
+      <div class="tracker-close" onclick="closeTrackerBtn()">✕</div>
+    </div>
+    <div class="tracker-body">
+      <!-- artwork image strip -->
+      <div class="wf-img wf-block" style="height:180px;border-radius:4px;">
+        <span class="wf-label">Artwork Image</span>
+      </div>
+      <!-- simple meta -->
+      <div class="tracker-meta">
+        <div class="meta-cell"><div class="meta-label">Medium</div><div class="meta-val"></div></div>
+        <div class="meta-cell"><div class="meta-label">Year</div><div class="meta-val" style="width:50%;"></div></div>
+        <div class="meta-cell"><div class="meta-label">Dimensions</div><div class="meta-val" style="width:65%;"></div></div>
+      </div>
+      <!-- current location -->
+      <div>
+        <div class="wf-label" style="font-size:9px;margin-bottom:8px;">CURRENT LOCATION</div>
+        <div class="current-loc">
+          <div class="loc-icon"></div>
+          <div class="loc-text">
+            <div class="tline t" style="width:55%;"></div>
+            <div class="tline" style="width:70%;"></div>
+          </div>
+          <div class="status-badge badge-exhibited">On View</div>
+        </div>
+      </div>
+      <!-- provenance timeline -->
+      <div class="tracker-divider">PROVENANCE</div>
+      <div class="provenance-timeline">
+        <div class="prov-item">
+          <div class="prov-dot-col"><div class="prov-dot active"></div></div>
+          <div class="prov-content">
+            <div class="prov-date">2024 — PRESENT</div>
+            <div class="prov-title"></div>
+            <div class="prov-sub"></div>
+            <div class="annotation" style="margin-top:6px;position:relative;bottom:auto;left:auto;">e.g. On loan · Museum of Art, Portland ME</div>
+          </div>
+        </div>
+        <div class="prov-item">
+          <div class="prov-dot-col"><div class="prov-dot"></div></div>
+          <div class="prov-content">
+            <div class="prov-date">2023</div>
+            <div class="prov-title"></div>
+            <div class="prov-sub"></div>
+            <div class="prov-sub2"></div>
+            <div class="annotation" style="margin-top:6px;position:relative;bottom:auto;left:auto;">e.g. Group show · Gallery name, City</div>
+          </div>
+        </div>
+        <div class="prov-item">
+          <div class="prov-dot-col"><div class="prov-dot"></div></div>
+          <div class="prov-content">
+            <div class="prov-date">2022</div>
+            <div class="prov-title"></div>
+            <div class="prov-sub"></div>
+            <div class="annotation" style="margin-top:6px;position:relative;bottom:auto;left:auto;">e.g. Solo show · Studio open house</div>
+          </div>
+        </div>
+        <div class="prov-item">
+          <div class="prov-dot-col"><div class="prov-dot"></div></div>
+          <div class="prov-content">
+            <div class="prov-date">2021 — CREATED</div>
+            <div class="prov-title"></div>
+            <div class="prov-sub"></div>
+            <div class="annotation" style="margin-top:6px;position:relative;bottom:auto;left:auto;">e.g. Studio, Portland ME</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="topbar-title">WIREFRAME</span>
+    <span class="topbar-sub">Personal Brand — 6-Page Site</span>
+  </div>
+  <div class="layout-switcher">
+    <button class="layout-btn active" onclick="showLayout('a')">A · Classic</button>
+    <button class="layout-btn" onclick="showLayout('b')">B · Sidebar</button>
+    <button class="layout-btn" onclick="showLayout('c')">C · Minimal</button>
+  </div>
+</div>
+
+<div class="legend">
+  <span style="font-weight:700;margin-right:4px;">LEGEND</span>
+  <div class="legend-item"><div class="legend-swatch" style="background:var(--block);"></div> Content block</div>
+  <div class="legend-item"><div class="legend-swatch swatch-img"></div> Image / media</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:var(--surface);"></div> Text / form</div>
+  <div class="legend-item"><div class="legend-swatch swatch-cta"></div> CTA / button</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#fffde7;border-color:#f0d060;"></div> Annotation</div>
+  <span style="margin-left:auto;opacity:0.6;">Click nav tabs to switch pages · Click any artwork to see tracker</span>
+</div>
+
+<div class="canvas">
+
+<!-- ══════════════════════════════════
+     LAYOUT A · CLASSIC
+══════════════════════════════════ -->
+<div id="layout-a" class="layout-view visible">
+  <div class="section-label">A · Classic — Top Navigation</div>
+  <div class="page">
+
+    <!-- ONE NAV -->
+    <div class="wf-nav">
+      <div class="nav-logo-block"></div>
+      <div class="nav-tabs">
+        <div class="nav-tab nav-active" id="a-tab-home" onclick="showPage('a','home')">Home</div>
+        <div class="nav-tab" id="a-tab-about" onclick="showPage('a','about')">About</div>
+        <div class="nav-tab" id="a-tab-art" onclick="showPage('a','art')">Art Portfolio</div>
+        <div class="nav-tab" id="a-tab-offerings" onclick="showPage('a','offerings')">Offerings</div>
+        <div class="nav-tab" id="a-tab-events" onclick="showPage('a','events')">Events</div>
+        <div class="nav-tab" id="a-tab-contact" onclick="showPage('a','contact')">Contact</div>
+      </div>
+    </div>
+
+    <!-- HOME -->
+    <div class="page-content visible" id="a-page-home">
+      <div class="hero-full">
+        <div class="hero-img-side wf-img wf-block" style="min-height:380px;">
+          <span class="wf-label">Hero Image</span>
+          <span class="wf-sublabel">Artwork or portrait</span>
+        </div>
+        <div class="hero-text-side">
+          <div class="tlines"><div class="tline h" style="width:65%;"></div><div class="tline t" style="width:45%;"></div></div>
+          <div class="tlines"><div class="tline" style="width:90%;"></div><div class="tline" style="width:80%;"></div><div class="tline" style="width:60%;"></div></div>
+          <div style="display:flex;gap:10px;margin-top:8px;">
+            <div class="cta-pill" style="width:120px;"><span class="wf-label" style="color:rgba(240,237,232,0.5);font-size:9px;">View Work</span></div>
+            <div class="cta-outline" style="width:110px;"><span class="wf-label" style="font-size:9px;">Contact</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+        <div class="wf-block" style="height:160px;padding:20px;"><span class="wf-label">Art</span><span class="wf-sublabel">Gallery teaser</span></div>
+        <div class="wf-block" style="height:160px;padding:20px;"><span class="wf-label">Offerings</span><span class="wf-sublabel">Yoga · Workshops</span></div>
+        <div class="wf-block" style="height:160px;padding:20px;"><span class="wf-label">Upcoming</span><span class="wf-sublabel">Next event teaser</span></div>
+      </div>
+      <div class="wf-footer wf-surface"><span class="wf-label">Footer — Social links · Nav · Copyright</span></div>
+    </div>
+
+    <!-- ABOUT -->
+    <div class="page-content" id="a-page-about">
+      <div class="about-split">
+        <div class="wf-img wf-block" style="min-height:340px;border-radius:4px;">
+          <span class="wf-label">Portrait / Artist Photo</span>
+        </div>
+        <div class="wf-surface" style="padding:32px;display:flex;flex-direction:column;gap:14px;">
+          <div class="tlines"><div class="tline h" style="width:55%;"></div><div class="tline t" style="width:35%;margin-bottom:4px;"></div><div class="tline" style="width:95%;"></div><div class="tline" style="width:90%;"></div><div class="tline" style="width:80%;"></div></div>
+          <div class="tag-row"><div class="tag">Artist</div><div class="tag">Yoga Enthusiast</div></div>
+          <div class="tlines"><div class="tline" style="width:90%;"></div><div class="tline" style="width:75%;"></div></div>
+          <span class="wf-note">ABOUT</span>
+        </div>
+      </div>
+      <div class="wf-block" style="height:120px;padding:24px;">
+        <span class="wf-label">Philosophy / Artist Statement</span>
+        <span class="wf-sublabel">Short quote or ethos block</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+        <div class="wf-surface" style="height:100px;padding:16px;display:flex;flex-direction:column;gap:6px;"><div class="tline t" style="width:60%;"></div><div class="tline" style="width:80%;"></div><div class="tline" style="width:50%;"></div></div>
+        <div class="wf-surface" style="height:100px;padding:16px;display:flex;flex-direction:column;gap:6px;"><div class="tline t" style="width:50%;"></div><div class="tline" style="width:90%;"></div><div class="tline" style="width:65%;"></div></div>
+        <div class="wf-surface" style="height:100px;padding:16px;display:flex;flex-direction:column;gap:6px;"><div class="tline t" style="width:70%;"></div><div class="tline" style="width:75%;"></div><div class="tline" style="width:55%;"></div></div>
+      </div>
+      <div class="wf-footer wf-surface"><span class="wf-label">Footer</span></div>
+    </div>
+
+    <!-- ART PORTFOLIO -->
+    <div class="page-content" id="a-page-art">
+      <div class="wf-surface" style="padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+        <div class="tlines"><div class="tline h" style="width:140px;"></div><div class="tline" style="width:90px;"></div></div>
+        <div class="art-filter">
+          <div class="af-tag af-active">All</div>
+          <div class="af-tag">Painting</div>
+          <div class="af-tag">Drawing</div>
+          <div class="af-tag">Mixed</div>
+          <div class="af-tag">Print</div>
+        </div>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--tag);padding:2px 0 6px;">↗ Click any artwork card to see the provenance tracker</div>
+      <div class="art-grid">
+        <div class="art-card art-wide" onclick="openTracker()">
+          <div class="art-card-img wf-img wf-block"><span class="wf-label" style="font-size:9px;">Featured Work</span></div>
+          <div class="art-card-body"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="tline t" style="width:50%;"></div><div class="status-badge badge-exhibited">Exhibited</div></div><div class="tline" style="width:35%;"></div></div>
+        </div>
+        <div class="art-card" onclick="openTracker()" style="grid-row:span 2;">
+          <div class="art-card-img wf-img wf-block" style="height:406px;"><span class="wf-label" style="font-size:9px;">Work</span></div>
+          <div class="art-card-body"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="tline t" style="width:55%;"></div><div class="status-badge badge-available">Available</div></div><div class="tline" style="width:40%;"></div></div>
+        </div>
+        <div class="art-card" onclick="openTracker()"><div class="art-card-img wf-img wf-block"><span class="wf-label" style="font-size:9px;">Work</span></div><div class="art-card-body"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="tline t" style="width:60%;"></div><div class="status-badge badge-sold">Sold</div></div><div class="tline" style="width:35%;"></div></div></div>
+        <div class="art-card" onclick="openTracker()"><div class="art-card-img wf-img wf-block"><span class="wf-label" style="font-size:9px;">Work</span></div><div class="art-card-body"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="tline t" style="width:45%;"></div><div class="status-badge badge-loan">On Loan</div></div><div class="tline" style="width:40%;"></div></div></div>
+        <div class="art-card" onclick="openTracker()"><div class="art-card-img wf-img wf-block"><span class="wf-label" style="font-size:9px;">Work</span></div><div class="art-card-body"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="tline t" style="width:55%;"></div><div class="status-badge badge-available">Available</div></div><div class="tline" style="width:30%;"></div></div></div>
+        <div class="art-card" onclick="openTracker()"><div class="art-card-img wf-img wf-block"><span class="wf-label" style="font-size:9px;">Work</span></div><div class="art-card-body"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="tline t" style="width:50%;"></div><div class="status-badge badge-exhibited">Exhibited</div></div><div class="tline" style="width:38%;"></div></div></div>
+        <div class="art-card" onclick="openTracker()"><div class="art-card-img wf-img wf-block"><span class="wf-label" style="font-size:9px;">Work</span></div><div class="art-card-body"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="tline t" style="width:65%;"></div><div class="status-badge badge-sold">Sold</div></div><div class="tline" style="width:42%;"></div></div></div>
+      </div>
+      <div class="wf-footer wf-surface"><span class="wf-label">Footer</span></div>
+    </div>
+
+    <!-- OFFERINGS -->
+    <div class="page-content" id="a-page-offerings">
+      <div class="hero-centered wf-surface" style="min-height:140px;">
+        <div class="tline h" style="width:280px;"></div>
+        <div class="tlines" style="width:400px;align-items:center;"><div class="tline" style="width:90%;"></div><div class="tline" style="width:65%;"></div></div>
+      </div>
+      <div class="offerings-grid">
+        <div class="offering-card wf-block">
+          <div class="offering-icon"></div>
+          <div class="tlines" style="width:80%;"><div class="tline t" style="width:55%;"></div><div class="tline" style="width:90%;"></div><div class="tline" style="width:70%;"></div></div>
+          <div class="offering-cta"><span class="wf-label" style="color:rgba(240,237,232,0.5);font-size:9px;">Book / Learn More</span></div>
+          <span class="wf-note">YOGA</span>
+        </div>
+        <div class="offering-card wf-block">
+          <div class="offering-icon"></div>
+          <div class="tlines" style="width:80%;"><div class="tline t" style="width:60%;"></div><div class="tline" style="width:85%;"></div><div class="tline" style="width:65%;"></div></div>
+          <div class="offering-cta"><span class="wf-label" style="color:rgba(240,237,232,0.5);font-size:9px;">Inquire</span></div>
+          <span class="wf-note">WORKSHOPS / TEACHING</span>
+        </div>
+        <div class="offering-card wf-block">
+          <div class="offering-icon"></div>
+          <div class="tlines" style="width:80%;"><div class="tline t" style="width:45%;"></div><div class="tline" style="width:90%;"></div><div class="tline" style="width:75%;"></div></div>
+          <div class="offering-cta"><span class="wf-label" style="color:rgba(240,237,232,0.5);font-size:9px;">Request Speaking</span></div>
+          <span class="wf-note">SPEAKING</span>
+        </div>
+        <div class="offering-card wf-block">
+          <div class="offering-icon"></div>
+          <div class="tlines" style="width:80%;"><div class="tline t" style="width:55%;"></div><div class="tline" style="width:80%;"></div><div class="tline" style="width:60%;"></div></div>
+          <div class="offering-cta"><span class="wf-label" style="color:rgba(240,237,232,0.5);font-size:9px;">Work With Me</span></div>
+          <span class="wf-note">CONSULTING</span>
+        </div>
+      </div>
+      <div class="wf-dark wf-block" style="min-height:110px;padding:24px;gap:8px;">
+        <span class="wf-label" style="color:rgba(240,237,232,0.4);">Testimonials / Social Proof</span>
+        <div style="display:flex;gap:14px;">
+          <div style="width:190px;height:55px;background:rgba(240,237,232,0.07);border:1px dashed rgba(240,237,232,0.15);border-radius:3px;"></div>
+          <div style="width:190px;height:55px;background:rgba(240,237,232,0.07);border:1px dashed rgba(240,237,232,0.15);border-radius:3px;"></div>
+          <div style="width:190px;height:55px;background:rgba(240,237,232,0.07);border:1px dashed rgba(240,237,232,0.15);border-radius:3px;"></div>
+        </div>
+      </div>
+      <div class="wf-footer wf-surface"><span class="wf-label">Footer</span></div>
+    </div>
+
+    <!-- EVENTS -->
+    <div class="page-content" id="a-page-events">
+      <div class="wf-surface" style="padding:20px 24px;"><div class="tline h" style="width:180px;margin-bottom:6px;"></div><div class="tline" style="width:280px;"></div></div>
+      <div class="cal-layout">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div class="wf-surface" style="height:44px;display:flex;align-items:center;padding:0 16px;gap:12px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--block);border:1px dashed var(--border);"></div>
+            <div class="tline t" style="width:90px;"></div>
+            <div style="margin-left:auto;width:20px;height:20px;border-radius:50%;background:var(--block);border:1px dashed var(--border);"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">
+            <div style="height:22px;background:var(--block);border-radius:2px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:8px;color:var(--label);">SUN</div>
+            <div style="height:22px;background:var(--block);border-radius:2px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:8px;color:var(--label);">MON</div>
+            <div style="height:22px;background:var(--block);border-radius:2px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:8px;color:var(--label);">TUE</div>
+            <div style="height:22px;background:var(--block);border-radius:2px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:8px;color:var(--label);">WED</div>
+            <div style="height:22px;background:var(--block);border-radius:2px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:8px;color:var(--label);">THU</div>
+            <div style="height:22px;background:var(--block);border-radius:2px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:8px;color:var(--label);">FRI</div>
+            <div style="height:22px;background:var(--block);border-radius:2px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:8px;color:var(--label);">SAT</div>
+          </div>
+          <div class="cal-grid">
+            <div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell"></div><div class="cal-cell has-event">3<div class="cal-dot"></div></div><div class="cal-cell">4</div><div class="cal-cell">5</div><div class="cal-cell has-event">6<div class="cal-dot"></div></div>
+            <div class="cal-cell">7</div><div class="cal-cell">8</div><div class="cal-cell today">9</div><div class="cal-cell">10</div><div class="cal-cell has-event">11<div class="cal-dot"></div></div><div class="cal-cell">12</div><div class="cal-cell">13</div>
+            <div class="cal-cell has-event">14<div class="cal-dot"></div></div><div class="cal-cell">15</div><div class="cal-cell">16</div><div class="cal-cell">17</div><div class="cal-cell">18</div><div class="cal-cell has-event">19<div class="cal-dot"></div></div><div class="cal-cell">20</div>
+            <div class="cal-cell">21</div><div class="cal-cell">22</div><div class="cal-cell has-event">23<div class="cal-dot"></div></div><div class="cal-cell">24</div><div class="cal-cell">25</div><div class="cal-cell">26</div><div class="cal-cell">27</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div class="wf-label" style="font-size:9px;padding:2px 0;">UPCOMING</div>
+          <div class="event-row wf-surface"><div style="height:7px;width:55%;background:var(--block);border-radius:2px;margin-bottom:2px;"></div><div class="tline t" style="width:80%;"></div><div class="tline" style="width:60%;"></div></div>
+          <div class="event-row wf-surface"><div style="height:7px;width:55%;background:var(--block);border-radius:2px;margin-bottom:2px;"></div><div class="tline t" style="width:70%;"></div><div class="tline" style="width:55%;"></div></div>
+          <div class="event-row wf-surface"><div style="height:7px;width:55%;background:var(--block);border-radius:2px;margin-bottom:2px;"></div><div class="tline t" style="width:85%;"></div><div class="tline" style="width:50%;"></div></div>
+          <div class="event-row wf-surface"><div style="height:7px;width:55%;background:var(--block);border-radius:2px;margin-bottom:2px;"></div><div class="tline t" style="width:65%;"></div><div class="tline" style="width:70%;"></div></div>
+          <div class="cta-pill" style="margin-top:auto;"><span class="wf-label" style="color:rgba(240,237,232,0.5);font-size:9px;">Subscribe / RSVP</span></div>
+        </div>
+      </div>
+      <div class="wf-footer wf-surface"><span class="wf-label">Footer</span></div>
+    </div>
+
+    <!-- CONTACT -->
+    <div class="page-content" id="a-page-contact">
+      <div class="wf-surface" style="padding:24px;display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div class="tline h" style="width:200px;"></div>
+        <div class="tline" style="width:300px;"></div>
+      </div>
+      <div class="contact-split">
+        <div class="wf-surface" style="padding:28px;display:flex;flex-direction:column;gap:10px;">
+          <span class="wf-label" style="font-size:9px;margin-bottom:2px;">CONTACT FORM</span>
+          <div class="form-field"></div>
+          <div class="form-field"></div>
+          <div class="form-field"></div>
+          <div class="form-field tall"></div>
+          <div class="cta-pill" style="width:130px;align-self:flex-start;"><span class="wf-label" style="color:rgba(240,237,232,0.5);font-size:9px;">Send Message</span></div>
+        </div>
+        <div class="wf-block" style="padding:28px;flex-direction:column;align-items:flex-start;justify-content:center;gap:14px;">
+          <span class="wf-label">Email / Location</span>
+          <div class="tlines" style="width:75%;"><div class="tline" style="width:90%;"></div><div class="tline" style="width:65%;"></div></div>
+          <div class="social-row"><div class="social-icon"></div><div class="social-icon"></div><div class="social-icon"></div></div>
+          <div class="annotation" style="position:relative;bottom:auto;left:auto;">Instagram · LinkedIn · etc.</div>
+        </div>
+      </div>
+      <div class="wf-footer wf-surface"><span class="wf-label">Footer</span></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     LAYOUT B · SIDEBAR
+══════════════════════════════════ -->
+<div id="layout-b" class="layout-view">
+  <div class="section-label">B · Sidebar — Identity Always Visible</div>
+  <div class="page">
+    <div class="sb-wrap">
+      <div class="sb-rail">
+        <div class="sb-avatar"><span style="color:rgba(240,237,232,0.2);font-family:'Space Mono',monospace;font-size:9px;">IMG</span></div>
+        <div class="sb-name-block"><div class="sb-n"></div><div class="sb-r"></div></div>
+        <div class="sb-menu">
+          <div class="sb-item sb-active" id="b-item-home" onclick="showPage('b','home')"><div class="sb-dot"></div><div class="sb-line" style="opacity:0.6;"></div><span style="font-family:'Space Mono',monospace;font-size:7px;color:rgba(240,237,232,0.3);">?</span></div>
+          <div class="sb-item" id="b-item-about" onclick="showPage('b','about')"><div class="sb-dot"></div><div class="sb-line dim"></div></div>
+          <div class="sb-item" id="b-item-art" onclick="showPage('b','art')"><div class="sb-dot"></div><div class="sb-line dim"></div></div>
+          <div class="sb-item" id="b-item-offerings" onclick="showPage('b','offerings')"><div class="sb-dot"></div><div class="sb-line dim"></div></div>
+          <div class="sb-item" id="b-item-events" onclick="showPage('b','events')"><div class="sb-dot"></div><div class="sb-line dim"></div></div>
+          <div class="sb-item" id="b-item-contact" onclick="showPage('b','contact')"><div class="sb-dot"></div><div class="sb-line dim"></div></div>
+        </div>
+        <div style="margin-top:auto;display:flex;gap:8px;justify-content:center;">
+          <div style="width:26px;height:26px;border-radius:50%;background:rgba(240,237,232,0.1);border:1px dashed rgba(240,237,232,0.15);"></div>
+          <div style="width:26px;height:26px;border-radius:50%;background:rgba(240,237,232,0.1);border:1px dashed rgba(240,237,232,0.15);"></div>
+          <div style="width:26px;height:26px;border-radius:50%;background:rgba(240,237,232,0.1);border:1px dashed rgba(240,237,232,0.15);"></div>
+        </div>
+      </div>
+      <div class="sb-main">
+
+        <div class="page-content visible" id="b-page-home">
+          <div class="wf-img wf-block" style="height:220px;border-radius:4px;"><span class="wf-label">Hero Art / Photo</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:4px;">
+            <div class="wf-block" style="height:120px;"><span class="wf-label">Art</span></div>
+            <div class="wf-block" style="height:120px;"><span class="wf-label">Offerings</span></div>
+            <div class="wf-block" style="height:120px;"><span class="wf-label">Events</span></div>
+          </div>
+        </div>
+
+        <div class="page-content" id="b-page-about">
+          <div style="display:grid;grid-template-columns:160px 1fr;gap:14px;">
+            <div class="wf-img wf-block" style="height:200px;border-radius:4px;"><span class="wf-label" style="font-size:9px;">Photo</span></div>
+            <div class="wf-surface" style="padding:18px;display:flex;flex-direction:column;gap:10px;">
+              <div class="tline h" style="width:60%;"></div>
+              <div class="tlines"><div class="tline" style="width:95%;"></div><div class="tline" style="width:80%;"></div><div class="tline" style="width:65%;"></div></div>
+              <div class="tag-row"><div class="tag">Artist</div><div class="tag">Yoga Enthusiast</div></div>
+            </div>
+          </div>
+          <div class="wf-block" style="height:90px;margin-top:4px;"><span class="wf-label">Philosophy / Statement</span></div>
+        </div>
+
+        <div class="page-content" id="b-page-art">
+          <div class="art-filter" style="margin-bottom:6px;">
+            <div class="af-tag af-active">All</div><div class="af-tag">Painting</div><div class="af-tag">Drawing</div><div class="af-tag">Mixed</div>
+          </div>
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--tag);padding:0 0 6px;">↗ Click any card to see provenance tracker</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="art-card" onclick="openTracker()"><div class="art-card-img wf-img wf-block"><span class="wf-label" style="font-size:9px;">Work</span></div><div class="art-card-body"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="tline t" style="width:55%;"></div><div class="status-badge badge-available">Available</div></div></div></div>
+            <div class="art-card" onclick="openTracker()"><div class="art-card-img wf-img wf-block"><span class="wf-label" style="font-size:9px;">Work</span></div><div class="art-card-body"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="tline t" style="width:65%;"></div><div class="status-badge badge-exhibited">Exhibited</div></div></div></div>
+            <div class="art-card" onclick="openTracker()"><div class="art-card-img wf-img wf-block"><span class="wf-label" style="font-size:9px;">Work</span></div><div class="art-card-body"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="tline t" style="width:50%;"></div><div class="status-badge badge-sold">Sold</div></div></div></div>
+            <div class="art-card" onclick="openTracker()"><div class="art-card-img wf-img wf-block"><span class="wf-label" style="font-size:9px;">Work</span></div><div class="art-card-body"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="tline t" style="width:70%;"></div><div class="status-badge badge-loan">On Loan</div></div></div></div>
+          </div>
+        </div>
+
+        <div class="page-content" id="b-page-offerings">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="wf-block" style="height:80px;padding:16px;flex-direction:row;justify-content:flex-start;gap:14px;"><div class="offering-icon" style="width:32px;height:32px;flex-shrink:0;"></div><div class="tlines" style="flex:1;"><div class="tline t" style="width:40%;"></div><div class="tline" style="width:75%;"></div></div><div class="offering-cta" style="width:76px;height:28px;"></div><span class="wf-note">YOGA</span></div>
+            <div class="wf-block" style="height:80px;padding:16px;flex-direction:row;justify-content:flex-start;gap:14px;"><div class="offering-icon" style="width:32px;height:32px;flex-shrink:0;"></div><div class="tlines" style="flex:1;"><div class="tline t" style="width:50%;"></div><div class="tline" style="width:80%;"></div></div><div class="offering-cta" style="width:76px;height:28px;"></div><span class="wf-note">WORKSHOPS</span></div>
+            <div class="wf-block" style="height:80px;padding:16px;flex-direction:row;justify-content:flex-start;gap:14px;"><div class="offering-icon" style="width:32px;height:32px;flex-shrink:0;"></div><div class="tlines" style="flex:1;"><div class="tline t" style="width:45%;"></div><div class="tline" style="width:70%;"></div></div><div class="offering-cta" style="width:76px;height:28px;"></div><span class="wf-note">SPEAKING</span></div>
+            <div class="wf-block" style="height:80px;padding:16px;flex-direction:row;justify-content:flex-start;gap:14px;"><div class="offering-icon" style="width:32px;height:32px;flex-shrink:0;"></div><div class="tlines" style="flex:1;"><div class="tline t" style="width:55%;"></div><div class="tline" style="width:65%;"></div></div><div class="offering-cta" style="width:76px;height:28px;"></div><span class="wf-note">CONSULTING</span></div>
+          </div>
+        </div>
+
+        <div class="page-content" id="b-page-events">
+          <div style="display:grid;grid-template-columns:1fr 180px;gap:12px;">
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div class="wf-surface" style="height:38px;display:flex;align-items:center;padding:0 14px;"><div class="tline t" style="width:100px;"></div></div>
+              <div class="cal-grid" style="gap:3px;">
+                <div class="cal-cell" style="height:40px;"></div><div class="cal-cell" style="height:40px;"></div><div class="cal-cell has-event" style="height:40px;"><div class="cal-dot"></div></div><div class="cal-cell" style="height:40px;"></div><div class="cal-cell has-event" style="height:40px;"><div class="cal-dot"></div></div><div class="cal-cell" style="height:40px;"></div><div class="cal-cell" style="height:40px;"></div>
+                <div class="cal-cell" style="height:40px;"></div><div class="cal-cell has-event" style="height:40px;"><div class="cal-dot"></div></div><div class="cal-cell" style="height:40px;"></div><div class="cal-cell today" style="height:40px;"></div><div class="cal-cell" style="height:40px;"></div><div class="cal-cell has-event" style="height:40px;"><div class="cal-dot"></div></div><div class="cal-cell" style="height:40px;"></div>
+                <div class="cal-cell has-event" style="height:40px;"><div class="cal-dot"></div></div><div class="cal-cell" style="height:40px;"></div><div class="cal-cell" style="height:40px;"></div><div class="cal-cell" style="height:40px;"></div><div class="cal-cell" style="height:40px;"></div><div class="cal-cell" style="height:40px;"></div><div class="cal-cell has-event" style="height:40px;"><div class="cal-dot"></div></div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div class="wf-label" style="font-size:9px;">UPCOMING</div>
+              <div class="event-row wf-surface"><div style="height:6px;width:50%;background:var(--block);border-radius:2px;margin-bottom:3px;"></div><div class="tline t" style="width:90%;"></div><div class="tline" style="width:65%;"></div></div>
+              <div class="event-row wf-surface"><div style="height:6px;width:50%;background:var(--block);border-radius:2px;margin-bottom:3px;"></div><div class="tline t" style="width:80%;"></div><div class="tline" style="width:55%;"></div></div>
+              <div class="event-row wf-surface"><div style="height:6px;width:50%;background:var(--block);border-radius:2px;margin-bottom:3px;"></div><div class="tline t" style="width:85%;"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="page-content" id="b-page-contact">
+          <div class="wf-surface" style="padding:22px;display:flex;flex-direction:column;gap:10px;">
+            <div class="tline h" style="width:50%;"></div>
+            <div class="tline" style="width:70%;"></div>
+            <div class="form-field" style="margin-top:6px;"></div>
+            <div class="form-field"></div>
+            <div class="form-field"></div>
+            <div class="form-field tall"></div>
+            <div class="cta-pill" style="width:110px;align-self:flex-start;"><span class="wf-label" style="color:rgba(240,237,232,0.5);font-size:9px;">Send</span></div>
+          </div>
+          <div class="wf-block" style="height:70px;flex-direction:row;gap:10px;">
+            <div class="social-icon"></div><div class="social-icon"></div><div class="social-icon"></div>
+            <span class="wf-sublabel">Social links</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     LAYOUT C · MINIMAL
+══════════════════════════════════ -->
+<div id="layout-c" class="layout-view">
+  <div class="section-label">C · Minimal — Centered, Editorial</div>
+  <div class="page" style="max-width:720px;">
+
+    <div style="height:54px;display:flex;align-items:center;justify-content:center;gap:2px;background:var(--surface);border:1px dashed var(--border);border-radius:4px;margin-bottom:12px;">
+      <div class="nav-tab nav-active" id="c-tab-home" onclick="showPage('c','home')">Home</div>
+      <div class="nav-tab" id="c-tab-about" onclick="showPage('c','about')">About</div>
+      <div class="nav-tab" id="c-tab-art" onclick="showPage('c','art')">Art Portfolio</div>
+      <div class="nav-tab" id="c-tab-offerings" onclick="showPage('c','offerings')">Offerings</div>
+      <div class="nav-tab" id="c-tab-events" onclick="showPage('c','events')">Events</div>
+      <div class="nav-tab" id="c-tab-contact" onclick="showPage('c','contact')">Contact</div>
+    </div>
+
+    <div class="page-content visible" id="c-page-home">
+      <div class="hero-centered wf-surface">
+        <div class="wf-img wf-block" style="width:140px;height:140px;border-radius:50%;"><span class="wf-label" style="font-size:9px;">Portrait</span></div>
+        <div class="tlines" style="align-items:center;"><div class="tline h" style="width:200px;"></div><div class="tline t" style="width:130px;"></div></div>
+        <div class="tlines" style="align-items:center;width:320px;"><div class="tline" style="width:90%;"></div><div class="tline" style="width:70%;"></div></div>
+        <div style="display:flex;gap:10px;"><div class="cta-pill" style="width:110px;"><span class="wf-label" style="color:rgba(240,237,232,0.5);font-size:9px;">View Work</span></div><div class="cta-outline" style="width:100px;"><span class="wf-label" style="font-size:9px;">Contact</span></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div class="wf-block" style="height:130px;"><span class="wf-label">Art</span></div>
+        <div class="wf-block" style="height:130px;"><span class="wf-label">Offerings</span></div>
+        <div class="wf-block" style="height:130px;"><span class="wf-label">Events</span></div>
+      </div>
+      <div class="wf-footer wf-surface"><span class="wf-label">Footer</span></div>
+    </div>
+
+    <div class="page-content" id="c-page-about">
+      <div class="wf-img wf-block" style="height:260px;border-radius:4px;"><span class="wf-label">Full-width portrait</span></div>
+      <div class="wf-surface" style="padding:36px 56px;display:flex;flex-direction:column;gap:12px;align-items:center;">
+        <div class="tline h" style="width:50%;"></div>
+        <div class="tlines" style="width:85%;align-items:center;"><div class="tline" style="width:95%;"></div><div class="tline" style="width:88%;"></div><div class="tline" style="width:75%;"></div></div>
+        <div class="tag-row" style="justify-content:center;margin-top:4px;"><div class="tag">Artist</div><div class="tag">Yoga Enthusiast</div></div>
+      </div>
+      <div class="wf-footer wf-surface"><span class="wf-label">Footer</span></div>
+    </div>
+
+    <div class="page-content" id="c-page-art">
+      <div class="art-filter" style="justify-content:center;padding:6px 0;">
+        <div class="af-tag af-active">All</div><div class="af-tag">Painting</div><div class="af-tag">Drawing</div><div class="af-tag">Mixed</div>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--tag);padding:0 0 6px;text-align:center;">↗ Click any card to see provenance tracker</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="art-card" onclick="openTracker()"><div class="art-card-img wf-img wf-block" style="height:280px;"><span class="wf-label">Featured Work — Full Width</span></div><div class="art-card-body"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="tline t" style="width:45%;"></div><div class="status-badge badge-exhibited">Exhibited</div></div><div class="tline" style="width:30%;"></div></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="art-card" onclick="openTracker()"><div class="art-card-img wf-img wf-block"><span class="wf-label" style="font-size:9px;">Work</span></div><div class="art-card-body"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="tline t" style="width:55%;"></div><div class="status-badge badge-available">Available</div></div></div></div>
+          <div class="art-card" onclick="openTracker()"><div class="art-card-img wf-img wf-block"><span class="wf-label" style="font-size:9px;">Work</span></div><div class="art-card-body"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="tline t" style="width:65%;"></div><div class="status-badge badge-sold">Sold</div></div></div></div>
+          <div class="art-card" onclick="openTracker()"><div class="art-card-img wf-img wf-block"><span class="wf-label" style="font-size:9px;">Work</span></div><div class="art-card-body"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="tline t" style="width:50%;"></div><div class="status-badge badge-loan">On Loan</div></div></div></div>
+          <div class="art-card" onclick="openTracker()"><div class="art-card-img wf-img wf-block"><span class="wf-label" style="font-size:9px;">Work</span></div><div class="art-card-body"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="tline t" style="width:60%;"></div><div class="status-badge badge-available">Available</div></div></div></div>
+        </div>
+      </div>
+      <div class="wf-footer wf-surface"><span class="wf-label">Footer</span></div>
+    </div>
+
+    <div class="page-content" id="c-page-offerings">
+      <div class="wf-surface" style="padding:28px 40px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;"><div class="tline h" style="width:40%;"></div><div class="tlines" style="width:70%;align-items:center;"><div class="tline" style="width:85%;"></div><div class="tline" style="width:60%;"></div></div></div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="wf-surface" style="padding:24px 36px;display:flex;align-items:center;gap:20px;"><div class="offering-icon"></div><div style="flex:1;display:flex;flex-direction:column;gap:7px;"><div class="tline t" style="width:30%;"></div><div class="tlines" style="width:70%;"><div class="tline" style="width:95%;"></div><div class="tline" style="width:75%;"></div></div></div><div class="offering-cta" style="width:90px;"><span class="wf-label" style="color:rgba(240,237,232,0.5);font-size:8px;">Yoga</span></div></div>
+        <div class="wf-surface" style="padding:24px 36px;display:flex;align-items:center;gap:20px;"><div class="offering-icon"></div><div style="flex:1;display:flex;flex-direction:column;gap:7px;"><div class="tline t" style="width:40%;"></div><div class="tlines" style="width:70%;"><div class="tline" style="width:90%;"></div><div class="tline" style="width:65%;"></div></div></div><div class="offering-cta" style="width:90px;"><span class="wf-label" style="color:rgba(240,237,232,0.5);font-size:8px;">Workshops</span></div></div>
+        <div class="wf-surface" style="padding:24px 36px;display:flex;align-items:center;gap:20px;"><div class="offering-icon"></div><div style="flex:1;display:flex;flex-direction:column;gap:7px;"><div class="tline t" style="width:35%;"></div><div class="tlines" style="width:70%;"><div class="tline" style="width:88%;"></div><div class="tline" style="width:70%;"></div></div></div><div class="offering-cta" style="width:90px;"><span class="wf-label" style="color:rgba(240,237,232,0.5);font-size:8px;">Speaking</span></div></div>
+        <div class="wf-surface" style="padding:24px 36px;display:flex;align-items:center;gap:20px;"><div class="offering-icon"></div><div style="flex:1;display:flex;flex-direction:column;gap:7px;"><div class="tline t" style="width:30%;"></div><div class="tlines" style="width:70%;"><div class="tline" style="width:92%;"></div><div class="tline" style="width:60%;"></div></div></div><div class="offering-cta" style="width:90px;"><span class="wf-label" style="color:rgba(240,237,232,0.5);font-size:8px;">Consulting</span></div></div>
+      </div>
+      <div class="wf-footer wf-surface"><span class="wf-label">Footer</span></div>
+    </div>
+
+    <div class="page-content" id="c-page-events">
+      <div class="wf-surface" style="padding:18px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;"><div class="tline h" style="width:180px;"></div></div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="event-row wf-surface" style="padding:18px 24px;"><div style="height:6px;width:50%;background:var(--block);border-radius:2px;margin-bottom:5px;"></div><div class="tline t" style="width:55%;margin-bottom:4px;"></div><div class="tline" style="width:40%;margin-bottom:8px;"></div><div class="cta-pill" style="width:88px;height:30px;align-self:flex-start;"></div></div>
+        <div class="event-row wf-surface" style="padding:18px 24px;"><div style="height:6px;width:50%;background:var(--block);border-radius:2px;margin-bottom:5px;"></div><div class="tline t" style="width:60%;margin-bottom:4px;"></div><div class="tline" style="width:50%;margin-bottom:8px;"></div><div class="cta-pill" style="width:88px;height:30px;align-self:flex-start;"></div></div>
+        <div class="event-row wf-surface" style="padding:18px 24px;"><div style="height:6px;width:50%;background:var(--block);border-radius:2px;margin-bottom:5px;"></div><div class="tline t" style="width:45%;margin-bottom:4px;"></div><div class="tline" style="width:60%;margin-bottom:8px;"></div><div class="cta-pill" style="width:88px;height:30px;align-self:flex-start;"></div></div>
+        <div class="event-row wf-surface" style="padding:18px 24px;"><div style="height:6px;width:50%;background:var(--block);border-radius:2px;margin-bottom:5px;"></div><div class="tline t" style="width:70%;margin-bottom:4px;"></div><div class="tline" style="width:35%;margin-bottom:8px;"></div><div class="cta-pill" style="width:88px;height:30px;align-self:flex-start;"></div></div>
+      </div>
+      <div class="wf-footer wf-surface"><span class="wf-label">Footer</span></div>
+    </div>
+
+    <div class="page-content" id="c-page-contact">
+      <div class="wf-surface" style="padding:36px 56px;display:flex;flex-direction:column;gap:10px;align-items:center;max-width:480px;margin:0 auto;">
+        <div class="tline h" style="width:60%;"></div>
+        <div class="tline" style="width:80%;"></div>
+        <div style="width:100%;display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+          <div class="form-field" style="width:100%;"></div>
+          <div class="form-field" style="width:100%;"></div>
+          <div class="form-field" style="width:100%;"></div>
+          <div class="form-field tall" style="width:100%;"></div>
+          <div class="cta-pill" style="width:110px;align-self:flex-start;"><span class="wf-label" style="color:rgba(240,237,232,0.5);font-size:9px;">Send</span></div>
+        </div>
+        <div class="social-row" style="margin-top:8px;justify-content:center;"><div class="social-icon"></div><div class="social-icon"></div><div class="social-icon"></div></div>
+      </div>
+      <div class="wf-footer wf-surface"><span class="wf-label">Footer</span></div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<script>
+  const pages = ['home','about','art','offerings','events','contact'];
+
+  function showLayout(id) {
+    document.querySelectorAll('.layout-view').forEach(el => el.classList.remove('visible'));
+    document.querySelectorAll('.layout-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('layout-' + id).classList.add('visible');
+    document.querySelectorAll('.layout-btn').forEach(btn => {
+      if (btn.textContent.trim().toLowerCase().startsWith(id)) btn.classList.add('active');
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function showPage(layout, page) {
+    pages.forEach(p => {
+      const el = document.getElementById(layout + '-page-' + p);
+      if (el) { el.style.display = 'none'; el.classList.remove('visible'); }
+    });
+    const target = document.getElementById(layout + '-page-' + page);
+    if (target) { target.style.display = 'contents'; target.classList.add('visible'); }
+
+    // nav highlight
+    if (layout === 'a' || layout === 'c') {
+      document.querySelectorAll('#layout-' + layout + ' .nav-tab').forEach(t => t.classList.remove('nav-active'));
+      const nt = document.getElementById(layout + '-tab-' + page);
+      if (nt) nt.classList.add('nav-active');
+    }
+    if (layout === 'b') {
+      document.querySelectorAll('.sb-item').forEach(t => t.classList.remove('sb-active'));
+      const si = document.getElementById('b-item-' + page);
+      if (si) si.classList.add('sb-active');
+    }
+  }
+
+  function openTracker() {
+    document.getElementById('trackerOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeTrackerBtn() {
+    document.getElementById('trackerOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function closeTracker(e) {
+    if (e.target === document.getElementById('trackerOverlay')) closeTrackerBtn();
+  }
+
+  // init
+  showPage('a','home');
+  showPage('b','home');
+  showPage('c','home');
+</script>
+</body>
+</html>
